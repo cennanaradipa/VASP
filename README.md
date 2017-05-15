@@ -4,7 +4,7 @@ This project is a fork from Ryan Valenza's repo, which you can check out just un
 
 ### readEIGENVAL.py
 
-My modificiations I made are mostly on this script. I'm still a bit new to Python, so there might be some redundancies in the code. Here's a list of all the changes I've added:
+The modificiations I made are mostly on this script. I'm still a bit new to Python, so there might be some redundancies in the code. Here's a list of all the changes I've added:
 
 * Corrected kpoint coordinates so that it will add up per increment of the absolute difference between each kpoint
 * I wanted to keep the regular expression method used by Valenza, but since I saw another script giving similar results using for loops, I went and change about 90% of the code to fit it. 
