@@ -1,29 +1,23 @@
-VASP
-====
-This project's goal is to use VASP to study the real space charge density upon electronic heating by an x-ray pulse.  It is also desirable to obtain the structure factor (the Fourier transform of the charge density) and create diffraction patterns that can be compared with experimental data acquired from synchrotrons.  During the project, I also became interested in understanding plane wave expansions, band structure calculations, Fermi-Dirac statistics, and other things involved in Density Functional Theory.  Here are a collection of my scripts and LaTeX documents for this project.
-
-Currently this project contains the following scripts:
-- vasp.py
-- readCHGCAR.py
-- readGCOEFF.py
-- readEIGENVAL.py
-- readDOSCAR.py
-
-
-### vasp.py & readCHGCAR.py
-
-This is the current method I'm using to obtain the structure factor from the charge density that VASP outputs in CHGCAR.  Beware that VASP only outputs the valence charge density, so to obtain the core run VASP with the option LAECHG = .TRUE. in INCAR.  This will create the files AECCAR0, containing the core, and AECCAR2, containing the valence.  Sum them to obtain the total density.  This density is read into readCHGCAR.py as a numpy array in column-major order (VASP's default for writing 3D arrays).  A discrete Fourier transform is performed and the result is a 3D array where the index {h,k,l} corresponds to a miller plane.  See the LaTeX document "Structure Factor FFT" for explanations of the theory.  
-
-### readGCOEFF.py
-
-This part of the project was an attempt to read the WAVECAR file from VASP, the thought being that it would be easy to obtain the structure factor from the wavefunctions given in a plane wave expansion (see the LaTeX document "Structure Factor PW").  To ensure that VASP evaluates the wavefunctions throughout the entire Brillouin zone, the symmetry must be turned off by setting SYM = 0 in INCAR.  I used a FORTRAN script called [WaveTrans](http://www.andrew.cmu.edu/user/feenstra/wavetrans/) written by a group at Carnegie Mellon University.  This script reads the WAVECAR file and produces an outfile called GCOEFF.txt which contains the plane wave coefficients indexed by band number, k-point, and G-vector.  My script readGCOEFF.py reads in the GCOEFF.txt file and reconstructs the structure factor - I was also playing around with python OOP structure and implemented a few other useful tools.  The problem with this method is that only the pseudo-wavefunctions for the valence electrons are included in the WAVECAR file.  It is extra work to include the PAW density coefficients and obtain the all-electron density.  
+VASP scripts
+============
+This project is a fork from Ryan Valenza's repo, which you can check out just under the repo name. Currently I am doing a spin polarized calculation with DFT+U to obtain optical propertie using VASP. The goal is to match the experimental data, giving additional evidence for the arguments to be put into the paper. I had trouble directly using Valenza's script as I don't use matpotlib and the symmetry points are different.
 
 ### readEIGENVAL.py
 
-This script reads in VASP's EIGENVAL file and obtains a data set of {Energy, k-point} pairs for every band calculated.  The data is organized in an outfile to be read into some plotting program.  
+My modificiations I made are mostly on this script. I'm still a bit new to Python, so there might be some redundancies in the code. Here's a list of all the changes I've added:
+
+* Corrected kpoint coordinates so that it will add up per increment of the absolute difference between each kpoint
+* I wanted to keep the regular expression method used by Valenza, but since I saw another script giving similar results using for loops, I went and change about 90% of the code to fit it. 
+* I added the functionality to be able to input spin polarization calculations
+* Values of bands will be shifted to the Fermi level, therefore you need to input the Fermi energy beforehand
+* Plotting is optimized for gnuplot's indexing format, however this can be modified easily
 
 ### readDOSCAR.py
 
-This script reads in VASP's DOSCAR file for a non spin-polarized calculation and plots the DOS and the integrated-DOS using matplotlib.  
+So far the most manageable way to plot the dos is to simply take the values that are relevant based on on the INCAR files, dump them to a .dat or .text file, and plot using gnuplot or any other plotting software. Detailed DOS can be deciphered if we look into the vasprun.xml file and the basic format shown in VASP manual, but a script is needed to sort this out for systems with large number of atoms. The old script by Valenza is for non-spin polarization calculations, so I did not use them. The format for spin polarized is simple, located at the first batch of data in the DOSCAR file.
 
-# Author:  Ryan Valenza
+### Other files on this repo
+
+I have deleted some of the files that are specific to the old project by Valenza.  I will keep the files for VASP scripting purposes and will modify them as soon as needed. 
+
+# Author: Muhammad Avicenna Naradipa 

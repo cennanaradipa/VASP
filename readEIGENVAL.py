@@ -1,15 +1,13 @@
 #!/usr/bin/python
-# Ryan Valenza
-# 2014-10-28
-# Mod 2016-08-08 MWistey: fix regexp, replace eval->enval
-# This script is the start of a project to create a series of
-# modules to interpret VASP outfiles.  The end goal is to be able
-# to quickly create plots and format data for external use.
+# Muhammad Avicenna Naradipa
+# Mod 5/5/2017 cennanaradipa: added gnuplot plotting, kpoints
+# Forked from Ryan Valenza
+# Post-processing for EIGENVAL file to plot bandstructures
 
 import sys
 import re
 import math
-
+import numpy as np
 try:
 	eigenval = open("EIGENVAL","r")
 except IOError:
@@ -24,46 +22,84 @@ eigenval.readline() # Cartesian/Direct
 name = eigenval.readline().rstrip() 
 print "# System:        " + name
 
-first = eigenval.readline() # Possibly interesting information
+# Important information
+first = eigenval.readline()
 (nelect,nkpts,nbands) = first.split()
 print "# of electrons:  " + nelect
 print "# of k-points:   " + nkpts
 print "# of bands:      " + nbands
 
-# Regular expressions are used to distinguish between a k-point and an eigenvalue
-regexs = {
-'kpt': "\s+(.\d+\.\d+E[+-]\d+)\s+(.\d+\.\d+E[+-]\d+)\s+(.\d+\.\d+E[+-]\d+)\s+.*",
-'enval': "\s+(\d+)\s+(-?.\d+\.\d+)" }
+# Details for easy plotting
+fermi = float(input("\n What is the Fermi Energy in eV? \n (Check from OUTCAR) \n"))
+print "Fermi Energy is set to ",fermi
 
-kpts = []
-bands = []
+spin  = raw_input("\n Is it spin polarized (y/n)? \n (ISPIN = 2) \n")
+if spin == 'y':
+    print "\n Taking two bands from EIGENVAL"
+else:
+    print "\n Taking one band from EIGENVAL"
+print "Creating bands_man.txt"
+#-------------------------------------------------- 
+# Begin collecting data
+#-------------------------------------------------- 
+
+# Initialization of bands, kpoints
+k     = [[0]*3 for i in range(int(nkpts))]
+bands = np.zeros((int(nkpts),int(nbands),2))
+xcor  = []
+
+# Open file for writing
+out = open("bands_man.txt","w")
+
+out.write("# These are the rewritten results of VASP calculation based on an EIGEIGENVAL file \n")
+out.write("# Some details include:")
+out.write("# Number of electrons %s\n"%nelect)
+out.write("# Number of k-points  %s\n"%nkpts)
+out.write("# Number of bands     %s\n"% nbands)
+out.write("# This has been formattted to gnuplot's indexing format \n")
+out.write("# Plot using this format:\n")
+out.write("#    plot for [IDX] i IDX u 1:2 w lines title \"columnheader(1)\"\n")
+
+for i in range(int(nkpts)):
+    
+    # empty line
+    eigenval.readline()
+    
+    # Split values inside lines 
+    kptline = eigenval.readline()
+    # print kptline
+    (kx,ky,kz,enval) = kptline.split()
+
+    # Ignore the first index
+    if i == 0:
+        k_tot = float(0)
+
+    # If not the first index, find mod
+    else:
+        k[i][0] = float(kx)
+        k[i][1] = float(ky)
+        k[i][2] = float(kz)
+        k_tot += math.sqrt( \
+                (k[i][0]-k[i-1][0])**2 + \
+                (k[i][1]-k[i-1][1])**2 + \
+                (k[i][2]-k[i-1][2])**2)
+    
+    xcor.append(k_tot)
+    for j in range(int(nbands)):
+        bandline = eigenval.readline()
+        if spin == 'y':
+            (bndnum,up,down,weightup,weightdown) = bandline.split() 
+            bands[i][j][0] = float(up)
+            bands[i][j][1] = float(down)
+            #print bands[j]
+        else:
+            (bndnum,nospin,weight) = bandline.split()
+            bands[i][j][0] = float(nospin)
+        
 for i in range(int(nbands)):
-	bands.append([]) 
-j = 0 # mark band number
-
-print "Finding k-point, energy pairs for each band..."
-for line in eigenval:
-	kpt = re.match(regexs['kpt'], line)
-	enval = re.match(regexs['enval'], line)
-
-	if kpt != None:
-		(kx,ky,kz) = kpt.groups()
-		k = math.sqrt(float(kx)**2 + float(ky)**2 + float(kz)**2)
-		k = k
-		
-	if enval != None:
-		e = float(enval.groups(0)[1])
-		bands[j%int(nbands)].append([k,e])
-		j += 1
-
-# As of right now, the data being is being organized into a format easily read
-# into Mathematica.  The format can be changed to fit future problems.
-# Ideas - use matplotlib to generate a bandstructure plot
-#       - numpy arrays
-print "Creating file bands.txt..."
-out = open("bands.txt", "w")
-for i in range(int(nbands)):
-	for j in range(int(nkpts)):
-		out.write("%d %.4f %.4f\n"%(i,bands[i][j][0],bands[i][j][1]))
-
+    out.write("\n\"Band #%d\" \n"%(i+1))
+    for j in range(int(nkpts)):
+        out.write("%.8f %.8f %.8f \n"%(xcor[j],
+            bands[j][i][0] - fermi,
+            bands[j][i][1] - fermi)) 
 
