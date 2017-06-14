@@ -52,13 +52,13 @@ xcor  = []
 out = open("bands_man.txt","w")
 
 out.write("# These are the rewritten results of VASP calculation based on an EIGEIGENVAL file \n")
-out.write("# Some details include:")
+out.write("# Some details include:\n")
 out.write("# Number of electrons %s\n"%nelect)
 out.write("# Number of k-points  %s\n"%nkpts)
 out.write("# Number of bands     %s\n"% nbands)
 out.write("# This has been formattted to gnuplot's indexing format \n")
 out.write("# Plot using this format:\n")
-out.write("#    plot for [IDX] i IDX u 1:2 w lines title \"columnheader(1)\"\n")
+out.write("#    plot for [IDX] i IDX u 1:2 w lines title \"columnheader\"\n")
 
 for i in range(int(nkpts)):
     
