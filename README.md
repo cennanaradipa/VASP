@@ -12,6 +12,10 @@ The modificiations I made are mostly on this script. I'm still a bit new to Pyth
 * Values of bands will be shifted to the Fermi level, therefore you need to input the Fermi energy beforehand
 * Plotting is optimized for gnuplot's indexing format, however this can be modified easily
 
+### bands.gnu
+
+This is the gnuplot script that is used to accept the output from readEIGENVAL.py. Aqua terminal is set here since it is best for OSX; for Unix the wxt terminal would do just fine. Other terminal can be configured, but please do look at the documentation on the settings for the respective terminals. Xtics (x axis) is determined by how many points you set in INCAR (e.g. if you set 40 in the KPOINTS file for 5 different points, you should go dwon 40 lines to get to each symmetry point). Set the maximum xrange based on the last symmetry point. Number of bands are represented in the index, so for 68 bands I used 0:67 indexes. This way you can show the only bands you want in the graph.
+
 ### readDOSCAR.py
 
 So far the most manageable way to plot the dos is to simply take the values that are relevant based on on the INCAR files, dump them to a .dat or .text file, and plot using gnuplot or any other plotting software. Detailed DOS can be deciphered if we look into the vasprun.xml file and the basic format shown in VASP manual, but a script is needed to sort this out for systems with large number of atoms. The old script by Valenza is for non-spin polarization calculations, so I did not use them. The format for spin polarized is simple, located at the first batch of data in the DOSCAR file.
