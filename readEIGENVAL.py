@@ -9,7 +9,8 @@ import re
 import math
 import numpy as np
 try:
-	eigenval = open("EIGENVAL","r")
+        filename = sys.argv[-1]
+        eigenval = open(filename,"r")
 except IOError:
 	sys.exit("Could not open EIGENVAL")
 
@@ -35,10 +36,10 @@ print "Fermi Energy is set to ",fermi
 
 spin  = raw_input("\n Is it spin polarized (y/n)? \n (ISPIN = 2) \n")
 if spin == 'y':
-    print "\n Taking two bands from EIGENVAL"
+    print "\n Taking two spins from EIGENVAL"
 else:
-    print "\n Taking one band from EIGENVAL"
-print "Creating bands_man.txt"
+    print "\n Taking one spin from EIGENVAL"
+print "Creating readable output file..."
 #-------------------------------------------------- 
 # Begin collecting data
 #-------------------------------------------------- 
@@ -49,9 +50,9 @@ bands = np.zeros((int(nkpts),int(nbands),2))
 xcor  = []
 
 # Open file for writing
-out = open("bands_man.txt","w")
+out = open("bands_" + filename + ".txt","w")
 
-out.write("# These are the rewritten results of VASP calculation based on an EIGEIGENVAL file \n")
+out.write("# These are the rewritten results of VASP calculation based on an EIGENVAL file \n")
 out.write("# Some details include:\n")
 out.write("# Number of electrons %s\n"%nelect)
 out.write("# Number of k-points  %s\n"%nkpts)
@@ -102,4 +103,5 @@ for i in range(int(nbands)):
         out.write("%.8f %.8f %.8f \n"%(xcor[j],
             bands[j][i][0] - fermi,
             bands[j][i][1] - fermi)) 
+    out.write("\n")
 
