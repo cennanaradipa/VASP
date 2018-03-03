@@ -1,10 +1,10 @@
 VASP scripts
 ============
-This project is a fork from Ryan Valenza's repo, which you can check out just under the repo name. Currently I am doing a spin polarized calculation with DFT+U to obtain optical propertie using VASP. The goal is to match the experimental data, giving additional evidence for the arguments to be put into the paper. I had trouble directly using Valenza's script as I don't use matpotlib and the symmetry points are different.
+This project is a fork from Ryan Valenza's repo, which you can check out just under the repo name. Currently I am doing a spin polarized calculation with DFT+U to obtain optical properties using VASP. The goal is to match the experimental data, giving additional evidence for the arguments to be put into the paper. I had trouble directly using Valenza's script as I don't use matpotlib and the symmetry points are different.
 
 ### readEIGENVAL.py
 
-The modificiations I made are mostly on this script. I'm still a bit new to Python, so there might be some redundancies in the code. Here's a list of all the changes I've added:
+The modifications I made are mostly on this script. I'm still a bit new to Python, so there might be some redundancies in the code. Here's a list of all the changes I've added:
 
 * Corrected kpoint coordinates so that it will add up per increment of the absolute difference between each kpoint
 * I wanted to keep the regular expression method used by Valenza, but since I saw another script giving similar results using for loops, I went and change about 90% of the code to fit it. 
